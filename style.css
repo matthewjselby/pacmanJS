@@ -1,0 +1,69 @@
+:root {
+    --block-size: 25px;
+}
+
+* {
+    margin: 0px;
+    padding: 0px;
+    background-color: black;
+    font-family: "Press Start 2P";
+}
+
+#wrapper {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+}
+
+#header {
+    display: relative;
+    width: 100%;
+    height: 100px;
+}
+
+#world {
+    height: calc(var(--block-size) * 36);
+    width: calc(var(--block-size) * 28);
+}
+
+.row div {
+    width: var(--block-size);
+    height: var(--block-size);
+    display: inline-block;
+    vertical-align: top;
+}
+
+.brick {
+    background-color: blue;
+}
+
+.pellet-container .pellet {
+    width: calc(var(--block-size) / 10);
+    height: calc(var(--block-size) / 10);
+    background-color: yellow;
+    margin: calc((var(--block-size) / 2) - (var(--block-size) / 10 / 2))
+}
+
+.cherry {
+    background-image: url(img/cherry.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-color: black;
+}
+
+#pacman {
+    background-image: url(img/pacman.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-color: black;
+}
+
+.empty {
+    background-color: black;
+}
