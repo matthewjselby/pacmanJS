@@ -22,12 +22,21 @@
 #header {
     display: relative;
     width: 100%;
-    height: 100px;
+    height: 40px;
+}
+
+#game {
+    image-rendering: pixelated;
+    margin: 0px 30px;
 }
 
 #world {
     height: calc(var(--block-size) * 36);
     width: calc(var(--block-size) * 28);
+}
+
+.row {
+    display: flex;
 }
 
 .row div {
@@ -65,5 +74,60 @@
 }
 
 .empty {
+    vertical-align: top;
     background-color: black;
+}
+
+.test-row {
+    display: flex;
+}
+
+.outer-border {
+    height: var(--block-size);
+    width: var(--block-size);
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.corner {
+    border-top: 1px solid blue;
+    border-left: 1px solid blue;
+    border-top-left-radius: 10px;
+}
+
+.corner.inner {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.corner.top-right {
+    transform: rotate(90deg)
+}
+
+.corner.bottom-right {
+    transform: rotate(180deg)
+}
+
+.corner.bottom-left {
+    transform: rotate(270deg)
+}
+
+.straight {
+    border-top: 1px solid blue;
+}
+
+.straight.inner {
+    margin-top: 10px;
+}
+
+.straight.right {
+    transform: rotate(90deg);
+}
+
+.straight.bottom {
+    transform: rotate(180deg)
+}
+
+.straight.left {
+    transform: rotate(270deg);
 }
