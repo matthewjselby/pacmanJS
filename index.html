@@ -7,7 +7,6 @@
     <title>Pacman Demo</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-    <link rel="stylesheet" href="./node_modules/nes.css/css/nes.css">
     <script src="./node_modules/jquery/dist/jquery.js"></script>
     <script type="module" src="main.js"></script>
 </head>
@@ -15,10 +14,17 @@
 <body>
     <div id="wrapper">
         <div id="header">
-            <p id="score"></p>
-            <p id="high_score"></p>
+            <div id="score-container">
+                <p id="one-up">1UP</p>
+                <p id="score">0</p>
+            </div>
+            <div id="high-score-container">
+                <p>HIGH SCORE</p>
+                <p id="high-score">19120</p>
+            </div>
         </div>
         <canvas id="game"></canvas>
+        <div id="footer"></div>
     </div>
 </body>
 
