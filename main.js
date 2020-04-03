@@ -1,7 +1,7 @@
 import World from "./src/world.js"
 import PacMan from "./src/pacman.js"
 
-var score = 0
+var scoreElement
 var world
 var pacman
 const fps = 60
@@ -9,6 +9,7 @@ const fps = 60
 document.addEventListener('DOMContentLoaded', () => {
     world = new World()
     pacman = new PacMan(world)
+    scoreElement = document.getElementById('score')
     gameLoop(0)
 })
 
@@ -31,6 +32,7 @@ const gameLoop = (timeStamp) => {
     if (timeDelta > (1000 / fps)) {
         pacman.updatePosition(timeDelta)
         lastTime = timeStamp
+        scoreElement.innerHTML = pacman.score
     }
     requestAnimationFrame(gameLoop)
 }

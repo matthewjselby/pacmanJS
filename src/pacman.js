@@ -109,10 +109,6 @@ export default class PacMan {
         }
     }
 
-    eatPellet() {
-        
-    }
-
     updatePosition(timeDelta) {
         // Update pacman's position
         if (this.offsetX == 0 && this.offsetY == 0) {
@@ -129,6 +125,10 @@ export default class PacMan {
             this.chomp(timeDelta)
             console.log("Moving--" + this.orientation)
             console.log("Col, row", this.col, this.row)
+            if(this.world.worldMap[this.row][this.col] == 1) {
+                this.score += 10
+                this.world.worldMap[this.row][this.col] = 0
+            }
             switch (this.orientation) {
                 case "right":
                     this.offsetX += this.moveIncrement
@@ -179,7 +179,7 @@ export default class PacMan {
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY, 30, 30)
+        this.world.ctx.clearRect(this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY, 28, 28)
     }
 
     draw() {
