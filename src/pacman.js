@@ -6,6 +6,8 @@ export default class PacMan {
         this.controlMargin = 2
         this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
         this.world = world
+        // Score
+        this.score = 0
         // Current position/state info
         this.offsetX = 0
         this.offsetY = 0
@@ -17,7 +19,7 @@ export default class PacMan {
         this.isMoving = true
         // Historical position/state info
         this.previousMouthState = 1
-        // Initialize pacman images
+        // Images for displaying pacman
         let img0 = new Image()
         img0.src = "./resources/pacman-0.png"
         let img1 = new Image()
@@ -90,7 +92,7 @@ export default class PacMan {
         }
     }
 
-    chomp() {
+    chomp(timeDelta) {
         if (this.mouthState == 2) {
             this.previousMouthState = this.mouthState
             this.mouthState = 1
@@ -107,6 +109,10 @@ export default class PacMan {
         }
     }
 
+    eatPellet() {
+        
+    }
+
     updatePosition(timeDelta) {
         // Update pacman's position
         if (this.offsetX == 0 && this.offsetY == 0) {
@@ -120,7 +126,7 @@ export default class PacMan {
             this.isMoving = true
             this.erase()
             // Update mouth position so that pacman to make pacman "chomp"
-            this.chomp()
+            this.chomp(timeDelta)
             console.log("Moving--" + this.orientation)
             console.log("Col, row", this.col, this.row)
             switch (this.orientation) {

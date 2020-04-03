@@ -34,7 +34,7 @@ export default class World {
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
         ]
-        this.canvas = $('#game')[0]
+        this.canvas = document.getElementById('game')
         this.ctx = this.canvas.getContext('2d')
         this.ctx.canvas.width = 28 * 16 + 2
         this.ctx.canvas.height = 32 * 16 + 2

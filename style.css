@@ -1,5 +1,5 @@
 :root {
-    --scaling-factor: 0.8;
+    --scaling-factor: 1.2;
     --width: calc(28px * 16 * var(--scaling-factor) + 2px);
     --height: calc(32px * 16 * var(--scaling-factor) + 2px);
 }
@@ -22,11 +22,12 @@
 }
 
 #header {
+    margin-top: 10px;
     position: relative;
     width: var(--width);
-    height: 30px;
+    height: 40px;
     color: white;
-    font-size: 10px;
+    font-size: 14px;
 }
 
 #score-container {
@@ -48,7 +49,7 @@
   }
 
 #high-score-container {
-    width: 120px;
+    width: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;

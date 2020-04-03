@@ -6,11 +6,11 @@ var world
 var pacman
 const fps = 60
 
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', () => {
     world = new World()
     pacman = new PacMan(world)
     gameLoop(0)
-}
+})
 
 document.addEventListener("keydown", function(event) {
     if (event.key == "ArrowUp") {

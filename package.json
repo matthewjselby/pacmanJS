@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "An arcade classic, rewritten using modern web technologies.",
   "main": "main.js",
-  "dependencies": {
-    "jquery": "^3.4.1"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
