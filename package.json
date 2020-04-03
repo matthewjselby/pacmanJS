@@ -1,36 +1,23 @@
 {
-    "name": "node-red-docker",
-    "version": "1.0.3",
-    "description": "Low-code programming for event-driven applications",
-    "homepage": "http://nodered.org",
-    "license": "Apache-2.0",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/node-red/node-red-docker.git"
-    },
-    "main": "node_modules/node-red/red/red.js",
-    "scripts": {
-        "start": "node $NODE_OPTIONS node_modules/node-red/red.js $FLOWS"
-    },
-    "contributors": [
-        {
-            "name": "Dave Conway-Jones"
-        },
-        {
-            "name": "Nick O'Leary"
-        },
-        {
-            "name": "James Thomas"
-        },
-        {
-            "name": "Raymond Mouthaan"
-        }
-    ],
-    "dependencies": {
-        "dateparser": "file:../../../date_parser",
-        "node-red": "1.0.3"
-    },
-    "engines": {
-        "node": ">=10"
-    }
+  "name": "pacman",
+  "version": "1.0.0",
+  "description": "An arcade classic, rewritten using modern web technologies.",
+  "main": "main.js",
+  "dependencies": {
+    "jquery": "^3.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matthewjselby/pacman.git"
+  },
+  "author": "Matthew Selby",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matthewjselby/pacman/issues"
+  },
+  "homepage": "https://github.com/matthewjselby/pacman#readme"
 }
