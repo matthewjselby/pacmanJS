@@ -17,6 +17,14 @@ export default class PacMan {
         this.isMoving = true
         // Historical position/state info
         this.previousMouthState = 1
+        // Initialize pacman images
+        let img0 = new Image()
+        img0.src = "./resources/pacman-0.png"
+        let img1 = new Image()
+        img1.src = "./resources/pacman-1.png"
+        let img2 = new Image()
+        img2.src = "./resources/pacman-2.png"
+        this.images = [img0, img1, img2]
         // Draw pacman when initialized
         this.draw()
     }
@@ -97,15 +105,10 @@ export default class PacMan {
             this.previousMouthState = this.mouthState
             this.mouthState = 2
         }
-        // Update pacman's position
-        if (this.offsetX == 0 && this.offsetY == 0) {
-            if (this.updatedOrientation) {
-                this.orientation = this.updatedOrientation
-            }
-        }
     }
 
     updatePosition(timeDelta) {
+        // Update pacman's position
         if (this.offsetX == 0 && this.offsetY == 0) {
             if (this.updatedOrientation) {
                 this.orientation = this.updatedOrientation
@@ -117,7 +120,7 @@ export default class PacMan {
             this.isMoving = true
             this.erase()
             // Update mouth position so that pacman to make pacman "chomp"
-            // this.chomp()
+            this.chomp()
             console.log("Moving--" + this.orientation)
             console.log("Col, row", this.col, this.row)
             switch (this.orientation) {
@@ -169,84 +172,31 @@ export default class PacMan {
         }
     }
 
-    move() {
-        switch (this.orientation) {
-            case "right":
-                this.offsetX += this.moveIncrement
-                if (this.offsetX == 16 || this.offsetX == 0) {
-                    this.col++
-                    this.offsetX = 0
-                    if (this.updatedOrientation) {
-                        this.orientation = this.updatedOrientation
-                        this.updatedOrientation = undefined
-                    }
-                }
-                break
-            case "left":
-                this.offsetX -= this.moveIncrement
-                if (this.offsetX == -16 || this.offsetX == 0) {
-                    this.col--
-                    this.offsetX = 0
-                    if (this.updatedOrientation) {
-                        this.orientation = this.updatedOrientation
-                        this.updatedOrientation = undefined
-                    }
-                }
-                break
-            case "down":
-                this.offsetY += this.moveIncrement
-                if (this.offsetY == 16 || this.offsetY == 0) {
-                    this.row++
-                    this.offsetY = 0
-                    if (this.updatedOrientation) {
-                        this.orientation = this.updatedOrientation
-                        this.updatedOrientation = undefined
-                    }
-                }
-                break
-            case "up":
-                this.offsetY -= this.moveIncrement
-                if (this.offsetY == -16 || this.offsetY == 0) {
-                    this.row--
-                    this.offsetY = 0
-                    if (this.updatedOrientation) {
-                        this.orientation = this.updatedOrientation
-                        this.updatedOrientation = undefined
-                    }
-                }
-                break
-        }
-    }
-
     erase() {
         this.world.ctx.clearRect(this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY, 30, 30)
     }
 
     draw() {
-        var pacmanImg = new Image()
-        pacmanImg.onload = () => {
-            this.world.ctx.save()
-            switch (this.orientation) {
-                case "left":
-                    this.world.ctx.translate(this.col * 16 + 16 + this.offsetX, this.row * 16 + 16 + this.offsetY)
-                    this.world.ctx.rotate(180 * Math.PI / 180)
-                    this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
-                    break
-                case "down":
-                    this.world.ctx.translate(this.col * 16 + 16 + this.offsetX, this.row * 16 + this.offsetY)
-                    this.world.ctx.rotate(90 * Math.PI / 180)
-                    this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
-                    break
-                case "up":
-                    this.world.ctx.translate(this.col * 16 + this.offsetX, this.row * 16 + 16 + this.offsetY)
-                    this.world.ctx.rotate(-90 * Math.PI / 180)
-                    this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
-                    break
-            }
-            this.world.ctx.drawImage(pacmanImg, this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY)
-            this.world.ctx.restore()
+        this.world.ctx.save()
+        switch (this.orientation) {
+            case "left":
+                this.world.ctx.translate(this.col * 16 + 16 + this.offsetX, this.row * 16 + 16 + this.offsetY)
+                this.world.ctx.rotate(180 * Math.PI / 180)
+                this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
+                break
+            case "down":
+                this.world.ctx.translate(this.col * 16 + 16 + this.offsetX, this.row * 16 + this.offsetY)
+                this.world.ctx.rotate(90 * Math.PI / 180)
+                this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
+                break
+            case "up":
+                this.world.ctx.translate(this.col * 16 + this.offsetX, this.row * 16 + 16 + this.offsetY)
+                this.world.ctx.rotate(-90 * Math.PI / 180)
+                this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
+                break
         }
-        pacmanImg.src = './resources/pacman-' + this.mouthState + '.png'
+        this.world.ctx.drawImage(this.images[this.mouthState], this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY)
+        this.world.ctx.restore()
     }
 
 }
