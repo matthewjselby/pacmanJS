@@ -4,11 +4,12 @@ import PacMan from "./src/pacman.js"
 var score = 0
 var world
 var pacman
+const fps = 60
 
 window.onload = function() {
     world = new World()
     pacman = new PacMan(world)
-    //gameLoop(0)
+    gameLoop(0)
 }
 
 document.addEventListener("keydown", function(event) {
@@ -27,8 +28,8 @@ let lastTime = 0
 
 const gameLoop = (timeStamp) => {
     let timeDelta = timeStamp - lastTime
-    if (timeDelta > (1000 / 60)) {
-        pacman.updatePosition()
+    if (timeDelta > (1000 / fps)) {
+        pacman.updatePosition(timeDelta)
         lastTime = timeStamp
     }
     requestAnimationFrame(gameLoop)

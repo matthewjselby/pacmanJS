@@ -1,8 +1,12 @@
 export default class PacMan {
 
     constructor(world) {
-        this.moveIncrement = 2
+        // Constants
+        this.moveIncrement = 4
         this.controlMargin = 2
+        this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
+        this.world = world
+        // Current position/state info
         this.offsetX = 0
         this.offsetY = 0
         this.row = 1
@@ -10,9 +14,10 @@ export default class PacMan {
         this.orientation = "down"
         this.updatedOrientation = undefined
         this.mouthState = 0
-        this.previousMouthState = 1
-        this.world = world
         this.isMoving = true
+        // Historical position/state info
+        this.previousMouthState = 1
+        // Draw pacman when initialized
         this.draw()
     }
 
@@ -77,37 +82,48 @@ export default class PacMan {
         }
     }
 
-    updatePosition() {
+    chomp() {
+        if (this.mouthState == 2) {
+            this.previousMouthState = this.mouthState
+            this.mouthState = 1
+        } else if (this.mouthState == 0) {
+            this.previousMouthState = this.mouthState
+            this.mouthState = 1
+            this.previousMouthState = 0
+        } else if (this.previousMouthState == 2) {
+            this.previousMouthState = this.mouthState
+            this.mouthState = 0
+        } else {
+            this.previousMouthState = this.mouthState
+            this.mouthState = 2
+        }
+        // Update pacman's position
+        if (this.offsetX == 0 && this.offsetY == 0) {
+            if (this.updatedOrientation) {
+                this.orientation = this.updatedOrientation
+            }
+        }
+    }
+
+    updatePosition(timeDelta) {
+        if (this.offsetX == 0 && this.offsetY == 0) {
+            if (this.updatedOrientation) {
+                this.orientation = this.updatedOrientation
+            }
+        }
         if (this.canMoveToNextSquareInDirection(this.orientation)) {
+            // Calculate movement increment -- how much pacman should move since a given time interval has passed
+            this.moveIncrement = this.targetMovementSpeed * timeDelta / 1000
             this.isMoving = true
             this.erase()
             // Update mouth position so that pacman to make pacman "chomp"
-            if (this.mouthState == 2) {
-                this.previousMouthState = this.mouthState
-                this.mouthState = 1
-            } else if (this.mouthState == 0) {
-                this.previousMouthState = this.mouthState
-                this.mouthState = 1
-                this.previousMouthState = 0
-            } else if (this.previousMouthState == 2) {
-                this.previousMouthState = this.mouthState
-                this.mouthState = 0
-            } else {
-                this.previousMouthState = this.mouthState
-                this.mouthState = 2
-            }
-            // Update pacman's position
-            if (this.offsetX == 0 && this.offsetY == 0) {
-                if (this.updatedOrientation) {
-                    this.orientation = this.updatedOrientation
-                }
-            }
+            // this.chomp()
             console.log("Moving--" + this.orientation)
             console.log("Col, row", this.col, this.row)
             switch (this.orientation) {
                 case "right":
                     this.offsetX += this.moveIncrement
-                    if (this.offsetX == 16 || this.offsetX == 0) {
+                    if (this.offsetX >= 16 || this.offsetX == 0) {
                         this.col++
                         if (this.col == 28) {
                             this.col = -1
@@ -117,7 +133,7 @@ export default class PacMan {
                     break
                 case "left":
                     this.offsetX -= this.moveIncrement
-                    if (this.offsetX == -16 || this.offsetX == 0) {
+                    if (this.offsetX <= -16 || this.offsetX == 0) {
                         this.col--
                         if (this.col == -1) {
                             this.col = 28
@@ -127,14 +143,14 @@ export default class PacMan {
                     break
                 case "down":
                     this.offsetY += this.moveIncrement
-                    if (this.offsetY == 16 || this.offsetY == 0) {
+                    if (this.offsetY >= 16 || this.offsetY == 0) {
                         this.row++
                         this.offsetY = 0
                     }
                     break
                 case "up":
                     this.offsetY -= this.moveIncrement
-                    if (this.offsetY == -16 || this.offsetY == 0) {
+                    if (this.offsetY <= -16 || this.offsetY == 0) {
                         this.row--
                         this.offsetY = 0
                     }
@@ -149,9 +165,6 @@ export default class PacMan {
                 this.mouthState = 0
                 this.draw()
                 this.isMoving = false
-            }
-            if (this.updatedOrientation) {
-                this.orientation = this.updatedOrientation
             }
         }
     }
@@ -206,7 +219,7 @@ export default class PacMan {
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY, 30, 30)
+        this.world.ctx.clearRect(this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY, 30, 30)
     }
 
     draw() {
@@ -230,7 +243,7 @@ export default class PacMan {
                     this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
                     break
             }
-            this.world.ctx.drawImage(pacmanImg, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
+            this.world.ctx.drawImage(pacmanImg, this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY)
             this.world.ctx.restore()
         }
         pacmanImg.src = './resources/pacman-' + this.mouthState + '.png'
