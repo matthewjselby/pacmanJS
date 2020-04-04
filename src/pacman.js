@@ -17,6 +17,8 @@ export default class PacMan {
         this.updatedOrientation = undefined
         this.mouthState = 0
         this.isMoving = true
+        this.changeDirRow = 0
+        this.changeDirCol = 0
         // Historical position/state info
         this.previousMouthState = 1
         // Images for displaying pacman
@@ -31,29 +33,46 @@ export default class PacMan {
         this.draw()
     }
 
-    canChangeDirectionFromNextSquare(direction) {
-        var rowToTest = this.row
-        var colToTest = this.col
-        if (Math.abs(this.offsetX) >= this.controlMargin) {
-            colToTest = colToTest + Math.sign(this.offsetX)
+    canChangeDirection(direction) {
+        if (this.canMoveToNextSquareInDirection(direction)) {
+            console.log("Current square", this.col, this.row, "can move", direction)
+            this.changeDirCol = this.col
+            this.changeDirRow = this.row
+            return true
+        } else if (this.canMoveToNextSquareInDirection(this.orientation)) {
+            this.changeDirCol = this.col
+            this.changeDirRow = this.row
+            switch (this.orientation) {
+                case "right":
+                    this.changeDirCol++
+                    break
+                case "left":
+                    this.changeDirCol--
+                    break
+                case "down":
+                    this.changeDirRow++
+                    break
+                case "up":
+                    this.changeDirRow--
+                    break
+            }
+            console.log("Checking if col, row", this.col, this.row, "can move", direction, "actual col, row", this.col, this.row)
+            switch (direction) {
+                case "right":
+                    return this.world.worldMap[this.changeDirRow][this.changeDirCol + 1] != 2
+                case "left":
+                    return this.world.worldMap[this.changeDirRow][this.changeDirCol - 1] != 2
+                case "down":
+                    return this.world.worldMap[this.changeDirRow + 1][this.changeDirCol] != 2
+                case "up":
+                    return this.world.worldMap[this.changeDirRow - 1][this.changeDirCol] != 2
+            }
         }
-        if (Math.abs(this.offsetY) >= this.controlMargin) {
-            rowToTest = rowToTest + Math.sign(this.offsetY)
-        }
-        switch (direction) {
-            case "right":
-                return this.world.worldMap[rowToTest][colToTest + 1] != 2
-            case "left":
-                return this.world.worldMap[rowToTest][colToTest - 1] != 2
-            case "down":
-                return this.world.worldMap[rowToTest + 1][colToTest] != 2
-            case "up":
-                return this.world.worldMap[rowToTest - 1][colToTest] != 2
-        }
+        return false
     }
 
     changeDirection(newDirection) {
-        if (this.canChangeDirectionFromNextSquare(newDirection)) {
+        if (this.canChangeDirection(newDirection)) {
             console.log("======= Orientation change ========")
             console.log("Offset X, Y", this.offsetX, this.offsetY)
             console.log("Actual row, col", this.row, this.col)
@@ -111,8 +130,8 @@ export default class PacMan {
 
     updatePosition(timeDelta) {
         // Update pacman's position
-        if (this.offsetX == 0 && this.offsetY == 0) {
-            if (this.updatedOrientation) {
+        if (this.updatedOrientation) {
+            if (this.changeDirRow == this.row && this.changeDirCol == this.col) {
                 this.orientation = this.updatedOrientation
             }
         }
@@ -123,15 +142,6 @@ export default class PacMan {
             this.erase()
             // Update mouth position so that pacman to make pacman "chomp"
             this.chomp(timeDelta)
-            console.log("Moving--" + this.orientation)
-            console.log("Col, row", this.col, this.row)
-            if(this.world.worldMap[this.row][this.col] == 1) {
-                this.score += 10
-                this.world.worldMap[this.row][this.col] = 0
-            } else if (this.world.worldMap[this.row][this.col] == 3) {
-                this.score += 50
-                this.world.worldMap[this.row][this.col] = 0
-            }
             switch (this.orientation) {
                 case "right":
                     this.offsetX += this.moveIncrement
@@ -168,13 +178,20 @@ export default class PacMan {
                     }
                     break
             }
+            if(this.world.worldMap[this.row][this.col] == 1) {
+                this.score += 10
+                this.world.worldMap[this.row][this.col] = 0
+            } else if (this.world.worldMap[this.row][this.col] == 3) {
+                this.score += 50
+                this.world.worldMap[this.row][this.col] = 0
+            }
             this.draw()
         } else {
             if (this.isMoving) {
                 // Close pacman's mouth when he hits a wall (can no longer move in desired direction)
                 this.erase()
-                this.previousMouthState = 1
-                this.mouthState = 0
+                this.previousMouthState = 0
+                this.mouthState = 1
                 this.draw()
                 this.isMoving = false
             }
@@ -186,6 +203,7 @@ export default class PacMan {
     }
 
     draw() {
+        console.log("Drawing pacman at col, row", this.col, this.row)
         this.world.ctx.save()
         switch (this.orientation) {
             case "left":
