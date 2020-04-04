@@ -13,7 +13,7 @@ export default class PacMan {
         this.offsetY = 0
         this.row = 1
         this.col = 1
-        this.orientation = "down"
+        this.orientation = "left"
         this.updatedOrientation = undefined
         this.mouthState = 0
         this.isMoving = true
@@ -128,6 +128,9 @@ export default class PacMan {
             if(this.world.worldMap[this.row][this.col] == 1) {
                 this.score += 10
                 this.world.worldMap[this.row][this.col] = 0
+            } else if (this.world.worldMap[this.row][this.col] == 3) {
+                this.score += 50
+                this.world.worldMap[this.row][this.col] = 0
             }
             switch (this.orientation) {
                 case "right":
@@ -179,7 +182,7 @@ export default class PacMan {
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY, 28, 28)
+        this.world.ctx.clearRect(this.col * 16 - 6 + this.offsetX, this.row * 16 - 6 + this.offsetY, 28, 28)
     }
 
     draw() {
@@ -201,7 +204,7 @@ export default class PacMan {
                 this.world.ctx.translate(-(this.col * 16 + this.offsetX), -(this.row * 16 + this.offsetY))
                 break
         }
-        this.world.ctx.drawImage(this.images[this.mouthState], this.col * 16 - 7 + this.offsetX, this.row * 16 - 7 + this.offsetY)
+        this.world.ctx.drawImage(this.images[this.mouthState], this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
         this.world.ctx.restore()
     }
 
