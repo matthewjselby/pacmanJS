@@ -23,6 +23,7 @@ export default class Blinky {
         this.updatedOrientation = undefined
         this.mode = "normal"
         this.frightenedTimer
+        this.deadFrames = 0
         // Load images for displaying Blinky
         let imgRight1 = new Image()
         imgRight1.src = "./resources/blinky-right-1.png"
@@ -84,42 +85,56 @@ export default class Blinky {
                 up: [imgDeadUp]
             })
         }
+        let scoreImg1 = new Image()
+        scoreImg1.src = "./resources/score-1.png"
+        let scoreImg2 = new Image()
+        scoreImg2.src = "./resources/score-2.png"
+        let scoreImg3 = new Image()
+        scoreImg3.src = "./resources/score-3.png"
+        let scoreImg4 = new Image()
+        scoreImg4.src = "./resources/score-4.png"
+        this.scoreImages = [
+            scoreImg1,
+            scoreImg2,
+            scoreImg3,
+            scoreImg4
+        ]
         this.currentImage = this.images[this.mode].next(this.orientation)
         this.pacman.ghosts.push(this)
     }
 
     getAllowedMoves() {
         let allowedMoves = []
-        if (this.mode == "normal") {
+        if (this.mode == "normal") { // Force movement out of ghost house in normal mode
             if ((this.row == 14 || this.row == 15) && (this.col >= 11 && this.col <= 16)) {
-                return[{col: 1, row: 1, dir:"up"}]
+                return [{ col: 1, row: 1, dir: "up" }]
             } else if (this.row == 13 && (this.col == 15 || this.col == 16)) {
-                return[{col: 1, row: 1, dir:"left"}]
+                return [{ col: 1, row: 1, dir: "left" }]
             } else if (this.row == 13 && (this.col == 11 || this.col == 12)) {
-                return[{col: 1, row: 1, dir:"right"}]
+                return [{ col: 1, row: 1, dir: "right" }]
             } else if (this.row == 13 && (this.col == 13 || this.col == 14)) {
-                return[{col: 1, row: 1, dir:"up"}]
+                return [{ col: 1, row: 1, dir: "up" }]
             } else if (this.row == 12 && (this.col == 13 || this.col == 14)) {
-                return[{col: 1, row: 1, dir:"up"}]
-            } 
+                return [{ col: 1, row: 1, dir: "up" }]
+            }
         }
         let upCol = this.col
         let upRow = this.row - 1
-        if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") allowedMoves.push({col: upCol, row: upRow, dir: "up"})
+        if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") allowedMoves.push({ col: upCol, row: upRow, dir: "up" })
         let downCol = this.col
         let downRow = this.row + 1
-        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") allowedMoves.push({col: downCol, row: downRow, dir: "down"})
+        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") allowedMoves.push({ col: downCol, row: downRow, dir: "down" })
         let leftCol = this.col - 1
         let leftRow = this.row
-        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({col: leftCol, row: leftRow, dir: "left"})
+        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({ col: leftCol, row: leftRow, dir: "left" })
         let rightCol = this.col + 1
         let rightRow = this.row
-        if (this.world.worldMap[rightRow][rightCol] != 2  && this.orientation != "left") allowedMoves.push({col: rightCol, row: rightRow, dir: "right"})
+        if (this.world.worldMap[rightRow][rightCol] != 2 && this.orientation != "left") allowedMoves.push({ col: rightCol, row: rightRow, dir: "right" })
         return allowedMoves
     }
 
     getDistanceFromBlockToTargetBlock(currentBlock, targetBlock) {
-        return Math.sqrt(Math.abs(currentBlock.row - targetBlock.row)**2 + Math.abs(currentBlock.col - targetBlock.col))
+        return Math.sqrt(Math.abs(currentBlock.row - targetBlock.row) ** 2 + Math.abs(currentBlock.col - targetBlock.col))
     }
 
     canMoveToNextSquareInDirection(direction) {
@@ -136,7 +151,7 @@ export default class Blinky {
     }
 
     reverseDirection() {
-        switch(this.orientation) {
+        switch (this.orientation) {
             case "right":
                 if (this.canMoveToNextSquareInDirection("left")) this.orientation = "left"
                 break
@@ -149,7 +164,7 @@ export default class Blinky {
             case "up":
                 if (this.canMoveToNextSquareInDirection("down")) this.orientation = "down"
                 break
-        }   
+        }
     }
 
     getTargetBlock() {
@@ -235,60 +250,68 @@ export default class Blinky {
         }
         this.erase()
         // Move in direction of current orientation
-        let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
-        switch (this.orientation) {
-            case "right":
-                this.offsetX += moveIncrement
-                if (this.offsetX >= 16 || this.offsetX == 0) {
-                    this.col++
-                    if (this.col == 28) {
-                        this.col = -1
+        if (this.deadFrames == 0) {
+            let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
+            switch (this.orientation) {
+                case "right":
+                    this.offsetX += moveIncrement
+                    if (this.offsetX >= 16 || this.offsetX == 0) {
+                        this.col++
+                        if (this.col == 28) {
+                            this.col = -1
+                        }
+                        this.offsetX = 0
                     }
-                    this.offsetX = 0
-                }
-                break
-            case "left":
-                this.offsetX -= moveIncrement
-                if (this.offsetX <= -16 || this.offsetX == 0) {
-                    this.col--
-                    if (this.col == -1) {
-                        this.col = 28
+                    break
+                case "left":
+                    this.offsetX -= moveIncrement
+                    if (this.offsetX <= -16 || this.offsetX == 0) {
+                        this.col--
+                        if (this.col == -1) {
+                            this.col = 28
+                        }
+                        this.offsetX = 0
                     }
-                    this.offsetX = 0
-                }
-                break
-            case "down":
-                this.offsetY += moveIncrement
-                if (this.offsetY >= 16 || this.offsetY == 0) {
-                    this.row++
-                    this.offsetY = 0
-                }
-                break
-            case "up":
-                this.offsetY -= moveIncrement
-                if (this.offsetY <= -16 || this.offsetY == 0) {
-                    this.row--
-                    this.offsetY = 0
-                }
-                break
-        }
-        if (this.checkForCollisionWithPacman()) {
-            if (this.mode == "frightened") {
-                this.reverseDirection()
-                this.mode = "dead"
-            } else if (this.mode == "normal" || this.mode == "scatter") {
-                this.pacman.isDead = true
-                this.mode = "finished"
-                return
+                    break
+                case "down":
+                    this.offsetY += moveIncrement
+                    if (this.offsetY >= 16 || this.offsetY == 0) {
+                        this.row++
+                        this.offsetY = 0
+                    }
+                    break
+                case "up":
+                    this.offsetY -= moveIncrement
+                    if (this.offsetY <= -16 || this.offsetY == 0) {
+                        this.row--
+                        this.offsetY = 0
+                    }
+                    break
             }
-        }
-        if (this.mode == "dead" && this.row == 13 && (this.col == 13 || this.col == 14)) {
-            this.mode = "normal"
+            if (this.checkForCollisionWithPacman()) {
+                if (this.mode == "frightened") {
+                    this.reverseDirection()
+                    this.mode = "dead"
+                    this.deadFrames = 2
+                } else if (this.mode == "normal" || this.mode == "scatter") {
+                    this.pacman.isDead = true
+                    this.mode = "finished"
+                    return
+                }
+            }
+            if (this.mode == "dead" && this.row == 13 && (this.col == 13 || this.col == 14)) {
+                this.mode = "normal"
+            }
         }
         // Animate movement (so that bottom of sprite appears to be moving)
         this.lastAnimationUpdate += timeDelta
         if (this.lastAnimationUpdate > 1000 / this.targetMovementAnimationSpeed) {
-            this.currentImage = this.images[this.mode].next(this.orientation)
+            if (this.deadFrames > 0) {
+                this.currentImage = this.scoreImages[this.pacman.ghostMultiplier - 1]
+                this.deadFrames--
+            } else {
+                this.currentImage = this.images[this.mode].next(this.orientation)
+            }
             this.lastAnimationUpdate = 0
         }
         this.draw()
