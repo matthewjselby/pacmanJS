@@ -20,8 +20,9 @@ export default class Blinky {
         this.offsetX = 8
         this.offsetY = 0
         this.orientation = "left"
+        this.updatedOrientation = undefined
         this.mode = "normal"
-        this.isInFrightenedCoolDown = false
+        this.frightenedTimer
         // Load images for displaying Blinky
         let imgRight1 = new Image()
         imgRight1.src = "./resources/blinky-right-1.png"
@@ -84,10 +85,24 @@ export default class Blinky {
             })
         }
         this.currentImage = this.images[this.mode].next(this.orientation)
+        this.pacman.ghosts.push(this)
     }
 
     getAllowedMoves() {
-        let allowedMoves = []      
+        let allowedMoves = []
+        if (this.mode == "normal") {
+            if ((this.row == 14 || this.row == 15) && (this.col >= 11 && this.col <= 16)) {
+                return[{col: 1, row: 1, dir:"up"}]
+            } else if (this.row == 13 && (this.col == 15 || this.col == 16)) {
+                return[{col: 1, row: 1, dir:"left"}]
+            } else if (this.row == 13 && (this.col == 11 || this.col == 12)) {
+                return[{col: 1, row: 1, dir:"right"}]
+            } else if (this.row == 13 && (this.col == 13 || this.col == 14)) {
+                return[{col: 1, row: 1, dir:"up"}]
+            } else if (this.row == 12 && (this.col == 13 || this.col == 14)) {
+                return[{col: 1, row: 1, dir:"up"}]
+            } 
+        }
         let upCol = this.col
         let upRow = this.row - 1
         if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") allowedMoves.push({col: upCol, row: upRow, dir: "up"})
@@ -107,23 +122,34 @@ export default class Blinky {
         return Math.sqrt(Math.abs(currentBlock.row - targetBlock.row)**2 + Math.abs(currentBlock.col - targetBlock.col))
     }
 
-    reverseDirection() {
-        if (this.xOffset != 0 || this.yOffset == 0) {
-            switch(this.orientation) {
-                case "right":
-                    this.orientation = "left"
-                    break
-                case "down":
-                    this.orientation = "up"
-                    break
-                case "left":
-                    this.orientation = "right"
-                    break
-                case "up":
-                    this.orientation = "down"
-                    break
-            }   
+    canMoveToNextSquareInDirection(direction) {
+        switch (direction) {
+            case "right":
+                return this.world.worldMap[this.row][this.col + 1] != 2
+            case "left":
+                return this.world.worldMap[this.row][this.col - 1] != 2
+            case "down":
+                return this.world.worldMap[this.row + 1][this.col] != 2
+            case "up":
+                return this.world.worldMap[this.row - 1][this.col] != 2
         }
+    }
+
+    reverseDirection() {
+        switch(this.orientation) {
+            case "right":
+                if (this.canMoveToNextSquareInDirection("left")) this.orientation = "left"
+                break
+            case "down":
+                if (this.canMoveToNextSquareInDirection("up")) this.orientation = "up"
+                break
+            case "left":
+                if (this.canMoveToNextSquareInDirection("right")) this.orientation = "right"
+                break
+            case "up":
+                if (this.canMoveToNextSquareInDirection("down")) this.orientation = "down"
+                break
+        }   
     }
 
     getTargetBlock() {
@@ -163,7 +189,6 @@ export default class Blinky {
                 bestMove = allowedMoves[i]
             }
         }
-        console.log(bestMove)
         return bestMove.dir
     }
 
@@ -188,20 +213,22 @@ export default class Blinky {
         return false
     }
 
+    getScared() {
+        this.reverseDirection()
+        this.mode = "frightened"
+        clearTimeout(this.frightenedTimer)
+        this.frightenedTimer = setTimeout(() => {
+            if (this.mode == "frightened") this.mode == "normal"
+        }, 5 * 1000)
+    }
+
+    calmDown() {
+        this.mode = "normal"
+    }
+
     updatePosition(timeDelta) {
         if (this.mode == "finished") {
-            this.erase()
             return
-        }
-        if (this.pacman.isPoweredUp && !this.isInFrightenedCoolDown) {
-            this.reverseDirection()
-            this.mode = "frightened"
-            this.isInFrightenedCoolDown = true
-            setTimeout(() => {
-                this.mode = "normal"
-                this.isInFrightenedCoolDown = false
-                this.pacman.isPoweredUp = false
-            }, 60 * 1000)
         }
         if (this.offsetX == 0 && this.offsetY == 0) {
             this.orientation = this.determineNewDirection()
@@ -246,20 +273,17 @@ export default class Blinky {
                 break
         }
         if (this.checkForCollisionWithPacman()) {
-            console.log("Collision detected --", this.mode)
             if (this.mode == "frightened") {
                 this.reverseDirection()
                 this.mode = "dead"
             } else if (this.mode == "normal" || this.mode == "scatter") {
                 this.pacman.isDead = true
                 this.mode = "finished"
+                return
             }
         }
-        if (this.mode == "dead") {
-            if (this.row == 14 && this.col == 13) {
-                this.reverseDirection()
-                this.mode = "normal"
-            }
+        if (this.mode == "dead" && this.row == 13 && (this.col == 13 || this.col == 14)) {
+            this.mode = "normal"
         }
         // Animate movement (so that bottom of sprite appears to be moving)
         this.lastAnimationUpdate += timeDelta

@@ -8,6 +8,7 @@ export default class PacMan {
         this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
         this.targetMovementAnimationSpeed = 12 // Animate movement 4x / second
         this.lastAnimationUpdate = 0
+        this.ghosts = []
         // Init local params from input
         this.canvas = canvas
         this.ctx = this.canvas.getContext('2d')
@@ -141,6 +142,12 @@ export default class PacMan {
         }
     }
 
+    scareGhosts() {
+        for (let ghost of this.ghosts) {
+            ghost.getScared()
+        }
+    }
+
     updatePosition(timeDelta) {
         // Update pacman's position
         if (this.isDead) {
@@ -203,7 +210,7 @@ export default class PacMan {
                     this.world.worldMap[this.row][this.col] = 0
                     this.world.erasePellet(this.row, this.col)
                 } else if (this.world.worldMap[this.row][this.col] == 3) {
-                    this.isPoweredUp = true
+                    this.scareGhosts()
                     this.score += 50
                     this.world.worldMap[this.row][this.col] = 0
                     this.world.erasePellet(this.row, this.col)
