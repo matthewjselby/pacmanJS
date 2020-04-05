@@ -7,6 +7,8 @@ export default class Blinky {
         this.world = world
         this.pacman = pacman
         this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
+        this.targetMovementAnimationSpeed = 4 // Animate movement 4x / second
+        this.lastAnimationUpdate = 0
         // Current position/state info
         this.row = 11
         this.col = 13
@@ -15,7 +17,6 @@ export default class Blinky {
         this.orientation = "left"
         this.status = "normal"
         // Load images for displaying Blinky
-        this.currentImage
         let imgRight1 = new Image()
         imgRight1.src = "./resources/blinky-right-1.png"
         let imgRight2 = new Image()
@@ -70,6 +71,7 @@ export default class Blinky {
                 up: [imgDeadUp]
             })
         }
+        this.currentImage = this.images[this.status].next(this.orientation)
     }
 
     calculateNextBlock() {
@@ -77,15 +79,21 @@ export default class Blinky {
     }
 
     updatePosition(timeDelta) {
-
-        this.currentImage = this.images[this.status].next()
+        this.erase()
+        this.lastAnimationUpdate += timeDelta
+        if (this.lastAnimationUpdate > 1000 / this.targetMovementAnimationSpeed) {
+            this.currentImage = this.images[this.status].next(this.orientation)
+            this.lastAnimationUpdate = 0
+        }
+        this.draw()
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 6 + this.offsetX, this.row * 16 - 6 + this.offsetY, 28, 28)
+        this.world.ctx.clearRect(this.col * 16 - 6 + this.offsetX, this.row * 16 - 6 + this.offsetY, 30, 30)
     }
 
     draw() {
+        //console.log("Drawing blinky at col, row", this.col, this.)
         this.world.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
     }
 

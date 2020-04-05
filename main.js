@@ -34,6 +34,7 @@ const gameLoop = (timeStamp) => {
     let timeDelta = timeStamp - lastTime
     if (timeDelta > (1000 / fps)) {
         pacman.updatePosition(timeDelta)
+        blinky.updatePosition(timeDelta)
         lastTime = timeStamp
         scoreElement.innerHTML = pacman.score
     }

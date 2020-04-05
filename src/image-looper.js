@@ -9,7 +9,7 @@ let CreateImageLooper = (images) => {
         },
         stop: (orientation = "left") => {
             index = 0
-            return images[orientation][1]
+            return images[orientation][0]
         },
         reset: () => {
             index = 0
