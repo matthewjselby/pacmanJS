@@ -1,21 +1,26 @@
-import CreateImageLooper from "../src/image-looper.js"
+import { CreateImageLooper } from "../src/image-looper.js"
 
 export default class Blinky {
 
-    constructor(world, pacman) {
+    constructor(canvas, world, pacman) {
         // Constants
-        this.world = world
-        this.pacman = pacman
-        this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
+        this.targetMovementSpeed = 3.5 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
         this.targetMovementAnimationSpeed = 4 // Animate movement 4x / second
         this.lastAnimationUpdate = 0
+        // Set local vars from parameters
+        this.canvas = canvas
+        this.ctx = this.canvas.getContext('2d')
+        this.ctx.canvas.width = 28 * 16
+        this.ctx.canvas.height = 31 * 16
+        this.world = world
+        this.pacman = pacman
         // Current position/state info
         this.row = 11
         this.col = 13
         this.offsetX = 8
         this.offsetY = 0
         this.orientation = "left"
-        this.status = "normal"
+        this.mode = "normal"
         // Load images for displaying Blinky
         let imgRight1 = new Image()
         imgRight1.src = "./resources/blinky-right-1.png"
@@ -58,11 +63,17 @@ export default class Blinky {
                 left: [imgLeft1, imgLeft2],
                 up: [imgUp1, imgUp2]
             }),
-            scared: CreateImageLooper({
-                right: [imgScaredBlue1, imgScaredBlue2, imgScaredWhite1, imgScaredWhite2],
-                down: [imgScaredBlue1, imgScaredBlue2, imgScaredWhite1, imgScaredWhite2],
-                left: [imgScaredBlue1, imgScaredBlue2, imgScaredWhite1, imgScaredWhite2],
-                up: [imgScaredBlue1, imgScaredBlue2, imgScaredWhite1, imgScaredWhite2]
+            scatter: CreateImageLooper({
+                right: [imgRight1, imgRight2],
+                down: [imgDown1, imgDown2],
+                left: [imgLeft1, imgLeft2],
+                up: [imgUp1, imgUp2]
+            }),
+            frightened: CreateImageLooper({
+                right: [imgScaredBlue1, imgScaredWhite2, imgScaredWhite1, imgScaredBlue2],
+                down: [imgScaredBlue1, imgScaredWhite2, imgScaredWhite1, imgScaredBlue2],
+                left: [imgScaredBlue1, imgScaredWhite2, imgScaredWhite1, imgScaredBlue2],
+                up: [imgScaredBlue1, imgScaredWhite2, imgScaredWhite1, imgScaredBlue2]
             }),
             dead: CreateImageLooper({
                 right: [imgDeadRight],
@@ -71,30 +82,176 @@ export default class Blinky {
                 up: [imgDeadUp]
             })
         }
-        this.currentImage = this.images[this.status].next(this.orientation)
+        this.currentImage = this.images[this.mode].next(this.orientation)
     }
 
-    calculateNextBlock() {
+    getAllowedMoves() {
+        let allowedMoves = []
+        let rightCol = this.col + 1
+        let rightRow = this.row
+        if (this.world.worldMap[rightRow][rightCol] != 2  && this.orientation != "left") allowedMoves.push({col: rightCol, row: rightRow, dir: "right"})
+        let leftCol = this.col - 1
+        let leftRow = this.row
+        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({col: leftCol, row: leftRow, dir: "left"})
+        let downCol = this.col
+        let downRow = this.row + 1
+        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") allowedMoves.push({col: downCol, row: downRow, dir: "down"})
+        let upCol = this.col
+        let upRow = this.row - 1
+        if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") allowedMoves.push({col: upCol, row: upRow, dir: "up"})
+        return allowedMoves
+    }
 
+    getDistanceFromBlockToTargetBlock(currentBlock, targetBlock) {
+        return Math.sqrt(Math.abs(currentBlock.row - targetBlock.row)**2 + Math.abs(currentBlock.col - targetBlock.col))
+    }
+
+    reverseDirection() {
+        switch(this.orientation) {
+            case "right":
+                this.orientation = "left"
+                break
+            case "down":
+                this.orientation = "up"
+                break
+            case "left":
+                this.orientation = "right"
+                break
+            case "up":
+                this.orientation = "down"
+                break
+        }
+    }
+
+    getTargetBlock() {
+        switch (this.mode) {
+            case "normal":
+                return {
+                    row: this.pacman.row,
+                    col: this.pacman.col
+                }
+            case "scatter":
+                return { // If in scatter, Blinky moves to the upper right corner
+                    row: 1,
+                    col: 26
+                }
+            case "frightened":
+                return {
+                    row: Math.floor(Math.random() * 31),
+                    col: Math.floor(Math.random() * 28)
+                }
+        }
+    }
+
+    determineNewDirection() {
+        let targetBlock = this.getTargetBlock()
+        let allowedMoves = this.getAllowedMoves()
+        let bestMove = allowedMoves[0]
+        let shortestDistance = this.getDistanceFromBlockToTargetBlock(bestMove, targetBlock)
+        for (var i = 1; i < allowedMoves.length; i++) {
+            let distance = this.getDistanceFromBlockToTargetBlock(allowedMoves[i], targetBlock)
+            if (distance < shortestDistance) {
+                shortestDistance = distance
+                bestMove = allowedMoves[i]
+            }
+        }
+        return bestMove.dir
+    }
+
+    checkForCollisionWithPacman() {
+        let leftBound = (this.col * 16) + this.offsetX
+        let rightBound = (this.col * 16) + this.offsetX + 32
+        let upperBound = (this.row * 16) + this.offsetY
+        let lowerBound = (this.row * 16) + this.offsetY + 32
+        let pacmanLeftBound = (this.pacman.col * 16) + this.pacman.offsetX
+        let pacmanRightBound = (this.pacman.col * 16) + this.pacman.offsetX + 32
+        let pacmanUpperBound = (this.pacman.row * 16) + this.pacman.offsetY
+        let pacmanLowerBound = (this.pacman.row * 16) + this.pacman.offsetY + 32
+        if (this.col == this.pacman.col) {
+            if ((pacmanUpperBound < lowerBound && pacmanUpperBound > upperBound) || (pacmanLowerBound > upperBound && pacmanLowerBound < lowerBound)) {
+                this.pacman.isDead = true
+                this.mode = "finished"
+            }
+        } else if (this.row == this.pacman.row) {
+            if ((pacmanLeftBound < rightBound && pacmanLeftBound > leftBound) || (pacmanRightBound > leftBound && pacmanRightBound < rightBound)) {
+                console.log("Collision with pacman detected-blinky col, row", this.col, this.row, "right, left", rightBound, leftBound, "pacman right, left", pacmanRightBound, pacmanLeftBound)
+                this.pacman.isDead = true
+                this.mode = "finished"
+            }
+        }
     }
 
     updatePosition(timeDelta) {
+        if (this.mode == "finished") {
+            return
+        }
+        if (this.pacman.isPoweredUp && (this.mode == "normal" || this.mode == "scatter")) {
+            this.reverseDirection()
+            this.mode = "frightened"
+            setTimeout(() => {
+                this.mode = "normal"
+            }, 7 * 1000)
+        }
+        if (this.offsetX == 0 && this.offsetY == 0) {
+            this.orientation = this.determineNewDirection()
+        }
         this.erase()
+        // Move in direction of current orientation
+        let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
+        switch (this.orientation) {
+            case "right":
+                this.offsetX += moveIncrement
+                if (this.offsetX >= 16 || this.offsetX == 0) {
+                    this.col++
+                    if (this.col == 28) {
+                        this.col = -1
+                    }
+                    this.offsetX = 0
+                }
+                break
+            case "left":
+                this.offsetX -= moveIncrement
+                if (this.offsetX <= -16 || this.offsetX == 0) {
+                    this.col--
+                    if (this.col == -1) {
+                        this.col = 28
+                    }
+                    this.offsetX = 0
+                }
+                break
+            case "down":
+                this.offsetY += moveIncrement
+                if (this.offsetY >= 16 || this.offsetY == 0) {
+                    this.row++
+                    this.offsetY = 0
+                }
+                break
+            case "up":
+                this.offsetY -= moveIncrement
+                if (this.offsetY <= -16 || this.offsetY == 0) {
+                    this.row--
+                    this.offsetY = 0
+                }
+                break
+        }
+        this.checkForCollisionWithPacman()
+        if (this.mode == "finished") return
+        // Animate movement (so that bottom of sprite appears to be moving)
         this.lastAnimationUpdate += timeDelta
         if (this.lastAnimationUpdate > 1000 / this.targetMovementAnimationSpeed) {
-            this.currentImage = this.images[this.status].next(this.orientation)
+            this.currentImage = this.images[this.mode].next(this.orientation)
             this.lastAnimationUpdate = 0
         }
         this.draw()
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 6 + this.offsetX, this.row * 16 - 6 + this.offsetY, 30, 30)
+        this.ctx.clearRect(this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY, 32, 32)
     }
 
     draw() {
         //console.log("Drawing blinky at col, row", this.col, this.)
-        this.world.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
+        this.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
     }
 
 }

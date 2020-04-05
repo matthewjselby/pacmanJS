@@ -8,10 +8,14 @@ let blinky
 var scoreElement
 const fps = 60
 
+
 document.addEventListener('DOMContentLoaded', () => {
-    world = new World()
-    pacman = new PacMan(world)
-    blinky = new Blinky(world, pacman)
+    let worldCanvas = document.getElementById('world')
+    let pacmanCanvas = document.getElementById('pacman')
+    let blinkyCanvas = document.getElementById('blinky')
+    world = new World(worldCanvas)
+    pacman = new PacMan(pacmanCanvas, world)
+    blinky = new Blinky(blinkyCanvas, world, pacman)
     scoreElement = document.getElementById('score')
     gameLoop(0)
 })

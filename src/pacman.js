@@ -1,11 +1,18 @@
-import CreateImageLooper from './image-looper.js'
+import { CreateImageLooper, CreateImageIterator } from './image-looper.js'
 
 export default class PacMan {
 
-    constructor(world) {
+    constructor(canvas, world) {
         // Constants
         this.controlMargin = 2
         this.targetMovementSpeed = 4 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
+        this.targetMovementAnimationSpeed = 12 // Animate movement 4x / second
+        this.lastAnimationUpdate = 0
+        // Init local params from input
+        this.canvas = canvas
+        this.ctx = this.canvas.getContext('2d')
+        this.ctx.canvas.width = 28 * 16
+        this.ctx.canvas.height = 31 * 16
         this.world = world
         // Score
         this.score = 0
@@ -20,6 +27,7 @@ export default class PacMan {
         this.changeDirRow = 0
         this.changeDirCol = 0
         this.isPoweredUp = false
+        this.isDead = false
         // Load images for displaying Pacman
         this.currentImage
         let img0 = new Image()
@@ -46,6 +54,13 @@ export default class PacMan {
             left: [img0, imgLeft1, imgLeft2],
             up: [img0, imgUp1, imgUp2]
         })
+        let deadImages = []
+        for (var i = 0; i <= 10; i++) {
+            let newImage = new Image()
+            newImage.src = "./resources/pacman-dead-" + i + ".png"
+            deadImages.push(newImage)
+        }
+        this.deadImages = CreateImageIterator(deadImages)
     }
 
     canChangeDirection(direction) {
@@ -128,85 +143,97 @@ export default class PacMan {
 
     updatePosition(timeDelta) {
         // Update pacman's position
-        if (this.updatedOrientation) {
-            if (this.changeDirRow == this.row && this.changeDirCol == this.col) {
-                this.orientation = this.updatedOrientation
-            }
-        }
-        if (this.canMoveToNextSquareInDirection(this.orientation)) {
-            // Calculate movement increment -- how much pacman should move since a given time interval has passed
-            let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
-            this.isMoving = true
-            this.erase()
-            switch (this.orientation) {
-                case "right":
-                    this.offsetX += moveIncrement
-                    if (this.offsetX >= 16 || this.offsetX == 0) {
-                        this.col++
-                        if (this.col == 28) {
-                            this.col = -1
-                        }
-                        this.offsetX = 0
-                    }
-                    break
-                case "left":
-                    this.offsetX -= moveIncrement
-                    if (this.offsetX <= -16 || this.offsetX == 0) {
-                        this.col--
-                        if (this.col == -1) {
-                            this.col = 28
-                        }
-                        this.offsetX = 0
-                    }
-                    break
-                case "down":
-                    this.offsetY += moveIncrement
-                    if (this.offsetY >= 16 || this.offsetY == 0) {
-                        this.row++
-                        this.offsetY = 0
-                    }
-                    break
-                case "up":
-                    this.offsetY -= moveIncrement
-                    if (this.offsetY <= -16 || this.offsetY == 0) {
-                        this.row--
-                        this.offsetY = 0
-                    }
-                    break
-            }
-            if(this.world.worldMap[this.row][this.col] == 1) {
-                this.score += 10
-                this.world.worldMap[this.row][this.col] = 0
-            } else if (this.world.worldMap[this.row][this.col] == 3) {
-                this.isPoweredUp = true
-                console.log("Pacman is powered up")
-                setTimeout(() => {
-                    this.isPoweredUp = false
-                    console.log("Pacman is no longer powered up")
-                }, 1000 * 5)
-                this.score += 50
-                this.world.worldMap[this.row][this.col] = 0
-            }
-            this.currentImage = this.images.next(this.orientation)
-            this.draw()
-        } else {
-            if (this.isMoving) {
-                // Close pacman's mouth when he hits a wall (can no longer move in desired direction)
+        if (this.isDead) {
+            this.lastAnimationUpdate += timeDelta
+            if (this.lastAnimationUpdate > 1000 / this.targetMovementAnimationSpeed) {
+                this.lastAnimationUpdate = 0
                 this.erase()
-                this.currentImage = this.images.stop(this.orientation)
+                this.currentImage = this.deadImages.next()
+                if (this.currentImage != false) this.draw()
+            }
+        } else {
+            if (this.updatedOrientation) {
+                if (this.changeDirRow == this.row && this.changeDirCol == this.col) {
+                    this.orientation = this.updatedOrientation
+                }
+            }
+            if (this.canMoveToNextSquareInDirection(this.orientation) && !this.isDead) {
+                // Calculate movement increment -- how much pacman should move since a given time interval has passed
+                let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
+                this.isMoving = true
+                this.erase()
+                switch (this.orientation) {
+                    case "right":
+                        this.offsetX += moveIncrement
+                        if (this.offsetX >= 16 || this.offsetX == 0) {
+                            this.col++
+                            if (this.col == 28) {
+                                this.col = -1
+                            }
+                            this.offsetX = 0
+                        }
+                        break
+                    case "left":
+                        this.offsetX -= moveIncrement
+                        if (this.offsetX <= -16 || this.offsetX == 0) {
+                            this.col--
+                            if (this.col == -1) {
+                                this.col = 28
+                            }
+                            this.offsetX = 0
+                        }
+                        break
+                    case "down":
+                        this.offsetY += moveIncrement
+                        if (this.offsetY >= 16 || this.offsetY == 0) {
+                            this.row++
+                            this.offsetY = 0
+                        }
+                        break
+                    case "up":
+                        this.offsetY -= moveIncrement
+                        if (this.offsetY <= -16 || this.offsetY == 0) {
+                            this.row--
+                            this.offsetY = 0
+                        }
+                        break
+                }
+                if(this.world.worldMap[this.row][this.col] == 1) {
+                    this.score += 10
+                    this.world.worldMap[this.row][this.col] = 0
+                    this.world.erasePellet(this.row, this.col)
+                } else if (this.world.worldMap[this.row][this.col] == 3) {
+                    this.isPoweredUp = true
+                    console.log("Pacman is powered up")
+                    setTimeout(() => {
+                        this.isPoweredUp = false
+                        console.log("Pacman is no longer powered up")
+                    }, 1000 * 5)
+                    this.score += 50
+                    this.world.worldMap[this.row][this.col] = 0
+                    this.world.erasePellet(this.row, this.col)
+                }
+                this.currentImage = this.images.next(this.orientation)
                 this.draw()
-                this.isMoving = false
+            } else {
+                if (this.isMoving) {
+                    // Close pacman's mouth when he hits a wall (can no longer move in desired direction)
+                    this.erase()
+                    this.currentImage = this.images.stop(this.orientation)
+                    this.draw()
+                    this.isMoving = false
+                }
             }
         }
     }
 
     erase() {
-        this.world.ctx.clearRect(this.col * 16 - 6 + this.offsetX, this.row * 16 - 6 + this.offsetY, 28, 28)
+        this.ctx.clearRect(this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY, 32, 32)
     }
 
     draw() {
         console.log("Drawing pacman at col, row", this.col, this.row)
-        this.world.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
+        this.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
     }
 
 }

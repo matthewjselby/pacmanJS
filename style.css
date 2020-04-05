@@ -24,6 +24,7 @@
 #header {
     margin-top: 10px;
     position: relative;
+    left: calc(50% - var(--width) / 2);
     width: var(--width);
     height: 40px;
     color: white;
@@ -35,7 +36,7 @@
     flex-direction: column;
     justify-content: left;
     position: absolute;
-    left: 10%;
+    left: 5%;
     top: 0px;
 }
 
@@ -55,12 +56,30 @@
     align-items: center;
     justify-content: center;
     position: absolute;
-    left: calc((var(--width) / 2) - (120px / 2));
+    left: calc(50% - (240px / 2));
     top: 0px;
 }
 
 #game {
+    position: relative;
+}
+
+#game>canvas {
+    position: absolute;
+    left: calc(50% - var(--width) / 2);
     image-rendering: pixelated;
-    margin: 0px 30px;
     zoom: var(--scaling-factor);
+    background-color: transparent;
+}
+
+#world {
+    z-index: 0;
+}
+
+#pacman {
+    z-index: 1;
+}
+
+#blinky {
+    z-index: 2;
 }

@@ -17,25 +17,17 @@ let CreateImageLooper = (images) => {
     }
 }
 
-export default CreateImageLooper
+let CreateImageIterator = (images) => {
+    let index = 0
+    return {
+        next: () => {
+            if (index < images.length) {
+                return images[index++]
+            } else {
+                return false
+            }
+        }
+    }
+}
 
-
-// class ImageLooper {
-
-//     constructor(images) {
-//         this.images = images
-//     }
-
-//     [Symbol.iterator]() {
-//         let step = 0
-//         return {
-//             next: (orientation = "left") => {
-//                 if (step >= this.images[orientation].length) {
-//                     step = 0
-//                 }
-//                 return { value: this.images[orientation][step++] }
-//             }
-//         }
-//     }
-
-// }
+export { CreateImageLooper, CreateImageIterator }
