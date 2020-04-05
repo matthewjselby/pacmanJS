@@ -1,14 +1,17 @@
 import World from "./src/world.js"
 import PacMan from "./src/pacman.js"
+import Blinky from "./src/blinky.js"
 
+let world
+let pacman
+let blinky
 var scoreElement
-var world
-var pacman
 const fps = 60
 
 document.addEventListener('DOMContentLoaded', () => {
     world = new World()
     pacman = new PacMan(world)
+    blinky = new Blinky(world, pacman)
     scoreElement = document.getElementById('score')
     gameLoop(0)
 })

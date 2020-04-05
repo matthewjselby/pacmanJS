@@ -1,3 +1,5 @@
+import CreateImageLooper from './image-looper.js'
+
 export default class PacMan {
 
     constructor(world) {
@@ -14,13 +16,12 @@ export default class PacMan {
         this.col = 1
         this.orientation = "left"
         this.updatedOrientation = undefined
-        this.mouthState = 0
         this.isMoving = true
         this.changeDirRow = 0
         this.changeDirCol = 0
-        // Historical position/state info
-        this.previousMouthState = 1
-        // Load images for displaying pacman
+        this.isPoweredUp = false
+        // Load images for displaying Pacman
+        this.currentImage
         let img0 = new Image()
         img0.src = "./resources/pacman-0.png"
         let imgRight1 = new Image()
@@ -39,14 +40,12 @@ export default class PacMan {
         imgUp1.src = "./resources/pacman-up-1.png"
         let imgUp2 = new Image()
         imgUp2.src = "./resources/pacman-up-2.png"
-        this.images = {
+        this.images = CreateImageLooper({
             right: [img0, imgRight1, imgRight2],
             down: [img0, imgDown1, imgDown2],
             left: [img0, imgLeft1, imgLeft2],
             up: [img0, imgUp1, imgUp2]
-        }
-        // Draw pacman when initialized
-        this.draw()
+        })
     }
 
     canChangeDirection(direction) {
@@ -127,23 +126,6 @@ export default class PacMan {
         }
     }
 
-    chomp(timeDelta) {
-        if (this.mouthState == 2) {
-            this.previousMouthState = this.mouthState
-            this.mouthState = 1
-        } else if (this.mouthState == 0) {
-            this.previousMouthState = this.mouthState
-            this.mouthState = 1
-            this.previousMouthState = 0
-        } else if (this.previousMouthState == 2) {
-            this.previousMouthState = this.mouthState
-            this.mouthState = 0
-        } else {
-            this.previousMouthState = this.mouthState
-            this.mouthState = 2
-        }
-    }
-
     updatePosition(timeDelta) {
         // Update pacman's position
         if (this.updatedOrientation) {
@@ -156,8 +138,6 @@ export default class PacMan {
             let moveIncrement = this.targetMovementSpeed * timeDelta / 1000
             this.isMoving = true
             this.erase()
-            // Update mouth position so that pacman to make pacman "chomp"
-            this.chomp(timeDelta)
             switch (this.orientation) {
                 case "right":
                     this.offsetX += moveIncrement
@@ -198,16 +178,22 @@ export default class PacMan {
                 this.score += 10
                 this.world.worldMap[this.row][this.col] = 0
             } else if (this.world.worldMap[this.row][this.col] == 3) {
+                this.isPoweredUp = true
+                console.log("Pacman is powered up")
+                setTimeout(() => {
+                    this.isPoweredUp = false
+                    console.log("Pacman is no longer powered up")
+                }, 1000 * 5)
                 this.score += 50
                 this.world.worldMap[this.row][this.col] = 0
             }
+            this.currentImage = this.images.next(this.orientation)
             this.draw()
         } else {
             if (this.isMoving) {
                 // Close pacman's mouth when he hits a wall (can no longer move in desired direction)
                 this.erase()
-                this.previousMouthState = 0
-                this.mouthState = 1
+                this.currentImage = this.images.stop(this.orientation)
                 this.draw()
                 this.isMoving = false
             }
@@ -220,7 +206,7 @@ export default class PacMan {
 
     draw() {
         console.log("Drawing pacman at col, row", this.col, this.row)
-        this.world.ctx.drawImage(this.images[this.orientation][this.mouthState], this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
+        this.world.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
     }
 
 }
