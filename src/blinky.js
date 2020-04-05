@@ -21,6 +21,7 @@ export default class Blinky {
         this.offsetY = 0
         this.orientation = "left"
         this.mode = "normal"
+        this.isInFrightenedCoolDown = false
         // Load images for displaying Blinky
         let imgRight1 = new Image()
         imgRight1.src = "./resources/blinky-right-1.png"
@@ -35,12 +36,12 @@ export default class Blinky {
         let imgLeft2 = new Image()
         imgLeft2.src = "./resources/blinky-left-2.png"
         let imgUp1 = new Image()
-        imgUp1.src = "/.resources/blinky-up-1.png"
+        imgUp1.src = "./resources/blinky-up-1.png"
         let imgUp2 = new Image()
         imgUp2.src = "./resources/blinky-up-2.png"
         // Load images to display when Blinky is scared
         let imgScaredBlue1 = new Image()
-        imgScaredBlue1.src = "/.resources/scared-ghost-blue-1.png"
+        imgScaredBlue1.src = "./resources/scared-ghost-blue-1.png"
         let imgScaredBlue2 = new Image()
         imgScaredBlue2.src = "./resources/scared-ghost-blue-2.png"
         let imgScaredWhite1 = new Image()
@@ -86,19 +87,19 @@ export default class Blinky {
     }
 
     getAllowedMoves() {
-        let allowedMoves = []
-        let rightCol = this.col + 1
-        let rightRow = this.row
-        if (this.world.worldMap[rightRow][rightCol] != 2  && this.orientation != "left") allowedMoves.push({col: rightCol, row: rightRow, dir: "right"})
-        let leftCol = this.col - 1
-        let leftRow = this.row
-        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({col: leftCol, row: leftRow, dir: "left"})
-        let downCol = this.col
-        let downRow = this.row + 1
-        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") allowedMoves.push({col: downCol, row: downRow, dir: "down"})
+        let allowedMoves = []      
         let upCol = this.col
         let upRow = this.row - 1
         if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") allowedMoves.push({col: upCol, row: upRow, dir: "up"})
+        let downCol = this.col
+        let downRow = this.row + 1
+        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") allowedMoves.push({col: downCol, row: downRow, dir: "down"})
+        let leftCol = this.col - 1
+        let leftRow = this.row
+        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({col: leftCol, row: leftRow, dir: "left"})
+        let rightCol = this.col + 1
+        let rightRow = this.row
+        if (this.world.worldMap[rightRow][rightCol] != 2  && this.orientation != "left") allowedMoves.push({col: rightCol, row: rightRow, dir: "right"})
         return allowedMoves
     }
 
@@ -107,19 +108,21 @@ export default class Blinky {
     }
 
     reverseDirection() {
-        switch(this.orientation) {
-            case "right":
-                this.orientation = "left"
-                break
-            case "down":
-                this.orientation = "up"
-                break
-            case "left":
-                this.orientation = "right"
-                break
-            case "up":
-                this.orientation = "down"
-                break
+        if (this.xOffset != 0 || this.yOffset == 0) {
+            switch(this.orientation) {
+                case "right":
+                    this.orientation = "left"
+                    break
+                case "down":
+                    this.orientation = "up"
+                    break
+                case "left":
+                    this.orientation = "right"
+                    break
+                case "up":
+                    this.orientation = "down"
+                    break
+            }   
         }
     }
 
@@ -136,9 +139,14 @@ export default class Blinky {
                     col: 26
                 }
             case "frightened":
+                return { // If in scatter, Blinky moves to the upper right corner
+                    row: 1,
+                    col: 26
+                }
+            case "dead":
                 return {
-                    row: Math.floor(Math.random() * 31),
-                    col: Math.floor(Math.random() * 28)
+                    row: 14,
+                    col: 13
                 }
         }
     }
@@ -155,6 +163,7 @@ export default class Blinky {
                 bestMove = allowedMoves[i]
             }
         }
+        console.log(bestMove)
         return bestMove.dir
     }
 
@@ -169,28 +178,30 @@ export default class Blinky {
         let pacmanLowerBound = (this.pacman.row * 16) + this.pacman.offsetY + 32
         if (this.col == this.pacman.col) {
             if ((pacmanUpperBound < lowerBound && pacmanUpperBound > upperBound) || (pacmanLowerBound > upperBound && pacmanLowerBound < lowerBound)) {
-                this.pacman.isDead = true
-                this.mode = "finished"
+                return true
             }
         } else if (this.row == this.pacman.row) {
             if ((pacmanLeftBound < rightBound && pacmanLeftBound > leftBound) || (pacmanRightBound > leftBound && pacmanRightBound < rightBound)) {
-                console.log("Collision with pacman detected-blinky col, row", this.col, this.row, "right, left", rightBound, leftBound, "pacman right, left", pacmanRightBound, pacmanLeftBound)
-                this.pacman.isDead = true
-                this.mode = "finished"
+                return true
             }
         }
+        return false
     }
 
     updatePosition(timeDelta) {
         if (this.mode == "finished") {
+            this.erase()
             return
         }
-        if (this.pacman.isPoweredUp && (this.mode == "normal" || this.mode == "scatter")) {
+        if (this.pacman.isPoweredUp && !this.isInFrightenedCoolDown) {
             this.reverseDirection()
             this.mode = "frightened"
+            this.isInFrightenedCoolDown = true
             setTimeout(() => {
                 this.mode = "normal"
-            }, 7 * 1000)
+                this.isInFrightenedCoolDown = false
+                this.pacman.isPoweredUp = false
+            }, 60 * 1000)
         }
         if (this.offsetX == 0 && this.offsetY == 0) {
             this.orientation = this.determineNewDirection()
@@ -234,8 +245,22 @@ export default class Blinky {
                 }
                 break
         }
-        this.checkForCollisionWithPacman()
-        if (this.mode == "finished") return
+        if (this.checkForCollisionWithPacman()) {
+            console.log("Collision detected --", this.mode)
+            if (this.mode == "frightened") {
+                this.reverseDirection()
+                this.mode = "dead"
+            } else if (this.mode == "normal" || this.mode == "scatter") {
+                this.pacman.isDead = true
+                this.mode = "finished"
+            }
+        }
+        if (this.mode == "dead") {
+            if (this.row == 14 && this.col == 13) {
+                this.reverseDirection()
+                this.mode = "normal"
+            }
+        }
         // Animate movement (so that bottom of sprite appears to be moving)
         this.lastAnimationUpdate += timeDelta
         if (this.lastAnimationUpdate > 1000 / this.targetMovementAnimationSpeed) {

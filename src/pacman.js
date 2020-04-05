@@ -17,10 +17,10 @@ export default class PacMan {
         // Score
         this.score = 0
         // Current position/state info
-        this.offsetX = 0
+        this.offsetX = -8
         this.offsetY = 0
-        this.row = 1
-        this.col = 1
+        this.row = 23
+        this.col = 14
         this.orientation = "left"
         this.updatedOrientation = undefined
         this.isMoving = true
@@ -89,13 +89,13 @@ export default class PacMan {
             console.log("Checking if col, row", this.col, this.row, "can move", direction, "actual col, row", this.col, this.row, "offset x, y", this.offsetX, this.offsetY)
             switch (direction) {
                 case "right":
-                    return this.world.worldMap[this.changeDirRow][this.changeDirCol + 1] != 2
+                    return this.world.worldMap[this.changeDirRow][this.changeDirCol + 1] != 2 && this.world.worldMap[this.changeDirRow][this.changeDirCol + 1] != 4
                 case "left":
-                    return this.world.worldMap[this.changeDirRow][this.changeDirCol - 1] != 2
+                    return this.world.worldMap[this.changeDirRow][this.changeDirCol - 1] != 2 && this.world.worldMap[this.changeDirRow][this.changeDirCol - 1] != 4
                 case "down":
-                    return this.world.worldMap[this.changeDirRow + 1][this.changeDirCol] != 2
+                    return this.world.worldMap[this.changeDirRow + 1][this.changeDirCol] != 2 && this.world.worldMap[this.changeDirRow + 1][this.changeDirCol] != 4
                 case "up":
-                    return this.world.worldMap[this.changeDirRow - 1][this.changeDirCol] != 2
+                    return this.world.worldMap[this.changeDirRow - 1][this.changeDirCol] != 2 && this.world.worldMap[this.changeDirRow - 1][this.changeDirCol] != 4
             }
         }
         return false
@@ -131,13 +131,13 @@ export default class PacMan {
     canMoveToNextSquareInDirection(direction) {
         switch (direction) {
             case "right":
-                return this.world.worldMap[this.row][this.col + 1] != 2
+                return this.world.worldMap[this.row][this.col + 1] != 2 && this.world.worldMap[this.row][this.col + 1] != 4
             case "left":
-                return this.world.worldMap[this.row][this.col - 1] != 2
+                return this.world.worldMap[this.row][this.col - 1] != 2 && this.world.worldMap[this.row][this.col - 1] != 4
             case "down":
-                return this.world.worldMap[this.row + 1][this.col] != 2
+                return this.world.worldMap[this.row + 1][this.col] != 2 && this.world.worldMap[this.row + 1][this.col] != 4
             case "up":
-                return this.world.worldMap[this.row - 1][this.col] != 2
+                return this.world.worldMap[this.row - 1][this.col] != 2 && this.world.worldMap[this.row - 1][this.col] != 4
         }
     }
 
@@ -204,11 +204,6 @@ export default class PacMan {
                     this.world.erasePellet(this.row, this.col)
                 } else if (this.world.worldMap[this.row][this.col] == 3) {
                     this.isPoweredUp = true
-                    console.log("Pacman is powered up")
-                    setTimeout(() => {
-                        this.isPoweredUp = false
-                        console.log("Pacman is no longer powered up")
-                    }, 1000 * 5)
                     this.score += 50
                     this.world.worldMap[this.row][this.col] = 0
                     this.world.erasePellet(this.row, this.col)
