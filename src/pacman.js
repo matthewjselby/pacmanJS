@@ -19,10 +19,10 @@ export default class PacMan {
         // Score
         this.score = 0
         // Current position/state info
-        this.offsetX = -8
+        this.offsetX = 8s
         this.offsetY = 0
         this.row = 23
-        this.col = 14
+        this.col = 13
         this.orientation = "left"
         this.updatedOrientation = undefined
         this.isMoving = true
