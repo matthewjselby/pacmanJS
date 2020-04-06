@@ -7,6 +7,10 @@ let pacman
 let blinky
 var scoreElement
 const fps = 60
+// Get screen size
+const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+document.documentElement.style.setProperty('--scaling-factor', 1.2)
 
 
 document.addEventListener('DOMContentLoaded', () => {

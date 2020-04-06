@@ -4,6 +4,10 @@
     --height: calc(32px * 16 * var(--scaling-factor) + 2px);
 }
 
+@media only screen and (max-width: 799px) {
+    
+}
+
 * {
     margin: 0px;
     padding: 0px;
@@ -32,11 +36,12 @@
 }
 
 #score-container {
+    width: 100px;
     display: flex;
     flex-direction: column;
     justify-content: left;
     position: absolute;
-    left: 5%;
+    left: calc(var(--scaling-factor) * 10%);
     top: 0px;
 }
 
@@ -56,20 +61,21 @@
     align-items: center;
     justify-content: center;
     position: absolute;
-    left: calc(50% - (240px / 2));
+    left: calc(var(--width) / 2 - 140px / 2);
     top: 0px;
 }
 
 #game {
-    position: relative;
+    position: absolute;
+    width: var(--width);
+    left: calc(50% - var(--width) / 2);
 }
 
 #game>canvas {
-    position: absolute;
-    left: calc(50% - var(--width) / 2);
     image-rendering: pixelated;
     zoom: var(--scaling-factor);
     background-color: transparent;
+    position: absolute;
 }
 
 #world {
