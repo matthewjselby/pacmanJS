@@ -1,10 +1,10 @@
 import Ghost from "./ghost.js"
 
-export default class Pinky extends Ghost {
+export default class Inky extends Ghost {
 
     constructor(canvas, world, pacman, blinky) {
         super(canvas, world, pacman, "inky")
-        this.row = 1
+        this.row = 29
         this.col = 23
         this.blinky = blinky
     }
@@ -40,13 +40,13 @@ export default class Pinky extends Ghost {
                 return targetBlock
             case "scatter":
                 return { // If in scatter, Blinky moves to the upper right corner
-                    row: 1,
-                    col: 1
+                    row: 29,
+                    col: 23
                 }
             case "frightened":
                 return { // If in scatter, Blinky moves to the upper right corner
-                    row: 1,
-                    col: 1
+                    row: 29,
+                    col: 23
                 }
             case "dead":
                 return {

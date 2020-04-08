@@ -3,12 +3,14 @@ import PacMan from "./src/pacman.js"
 import Blinky from "./src/blinky.js"
 import Pinky from "./src/pinky.js"
 import Inky from "./src/inky.js"
+import Clyde from "./src/clyde.js"
 
 let world
 let pacman
 let blinky
 let pinky
 let inky
+let clyde
 var scoreElement
 const fps = 60
 // Get screen size
@@ -23,11 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let blinkyCanvas = document.getElementById('blinky')
     let pinkyCanvas = document.getElementById('pinky')
     let inkyCanvas = document.getElementById('inky')
+    let clydeCanvas = document.getElementById('clyde')
     world = new World(worldCanvas)
     pacman = new PacMan(pacmanCanvas, world)
     blinky = new Blinky(blinkyCanvas, world, pacman)
     pinky = new Pinky(pinkyCanvas, world, pacman)
     inky = new Inky(inkyCanvas, world, pacman, blinky)
+    clyde = new Clyde(clydeCanvas, world, pacman)
     scoreElement = document.getElementById('score')
     gameLoop(0)
 })
@@ -53,6 +57,7 @@ const gameLoop = (timeStamp) => {
         blinky.updatePosition(timeDelta)
         pinky.updatePosition(timeDelta)
         inky.updatePosition(timeDelta)
+        clyde.updatePosition(timeDelta)
         lastTime = timeStamp
         scoreElement.innerHTML = pacman.score
     }
