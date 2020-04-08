@@ -86,6 +86,6 @@
     z-index: 1;
 }
 
-#blinky {
+.ghost {
     z-index: 2;
 }

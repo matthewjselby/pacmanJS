@@ -42,8 +42,6 @@ export default class World {
     }
 
     erasePellet(row, col) {
-        console.log
-        console.log("erasing pellet at row, col", row, col)
         this.ctx.clearRect(col * 16, row * 16, 16, 16)
     }
 

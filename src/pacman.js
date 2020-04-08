@@ -67,7 +67,6 @@ export default class PacMan {
 
     canChangeDirection(direction) {
         if (this.canMoveToNextSquareInDirection(direction) && this.offsetX == 0 && this.offsetY == 0) { // Check if pacman is inside of a square where the new direction is open
-            console.log("Current square", this.col, this.row, "can move", direction)
             this.changeDirCol = this.col
             this.changeDirRow = this.row
             return true
@@ -88,7 +87,6 @@ export default class PacMan {
                     this.changeDirRow--
                     break
             }
-            console.log("Checking if col, row", this.col, this.row, "can move", direction, "actual col, row", this.col, this.row, "offset x, y", this.offsetX, this.offsetY)
             switch (direction) {
                 case "right":
                     return this.world.worldMap[this.changeDirRow][this.changeDirCol + 1] != 2
@@ -105,25 +103,17 @@ export default class PacMan {
 
     changeDirection(newDirection) {
         if (this.canChangeDirection(newDirection)) {
-            console.log("======= Orientation change ========")
-            console.log("Offset X, Y", this.offsetX, this.offsetY)
-            console.log("Actual row, col", this.row, this.col)
             switch (newDirection) {
                 case "right":
-                    console.log("Pacman -- changing orientation right")
                     this.updatedOrientation = newDirection
-
                     break
                 case "left":
-                    console.log("Pacman -- changing orientation left")
                     this.updatedOrientation = newDirection
                     break
                 case "up":
-                    console.log("Pacman -- changing orientation up")
                     this.updatedOrientation = newDirection
                     break
                 case "down":
-                    console.log("Pacman -- changing orientation down")
                     this.updatedOrientation = newDirection
                     break
             }
@@ -150,7 +140,8 @@ export default class PacMan {
     }
 
     ateGhost() {
-        this.score += 200
+        this.score += 200 * this.ghostMultiplier
+        this.ghostMultiplier += 1
     }
 
     updatePosition(timeDelta) {
@@ -239,7 +230,6 @@ export default class PacMan {
     }
 
     draw() {
-        console.log("Drawing pacman at col, row", this.col, this.row)
         this.ctx.drawImage(this.currentImage, this.col * 16 - 8 + this.offsetX, this.row * 16 - 8 + this.offsetY)
     }
 
