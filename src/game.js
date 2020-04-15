@@ -20,6 +20,8 @@ export default class Game {
         this.clyde = new Clyde(this)
         // Init score element for updating score
         this.scoreElement = document.getElementById('score')
+        this.highScoreElement = document.getElementById('high-score')
+        this.updateHighScore()
         // Init loading screens
         this.gameOverScreen = document.getElementById('game-over')
         this.wonGameScreen = document.getElementById('won-game')
@@ -32,7 +34,28 @@ export default class Game {
         })
     }
 
+    updateHighScore() {
+        this.highScoreElement.innerHTML = this.getHighScore()
+    }
+
+    getHighScore() {
+        let highScore = 0
+        let cookie = document.cookie.split(';')
+        for (let entry of cookie) {
+            if (entry.includes('highScore')) {
+                highScore = entry.split('=')[1]
+            }
+        }
+        return highScore
+    }
+
+    setHighScore(newHighScore) {
+        document.cookie = 'highScore=' + newHighScore
+        this.highScoreElement.innerHTML = newHighScore
+    }
+
     reset() {
+        this.updateHighScore()
         this.gameOverScreen.style.visibility = 'hidden'
         this.wonGameScreen.style.visibility = 'hidden'
         this.world = new World(this)
@@ -78,11 +101,17 @@ export default class Game {
     lostGame() {
         this.state = 'lost'
         this.gameOverScreen.style.visibility = 'visible'
+        if (this.pacman.score > this.getHighScore()) {
+            this.setHighScore(this.pacman.score)
+        }
     }
 
     wonGame() {
         this.state = 'won'
         this.wonGameScreen.style.visibility = 'visible'
+        if (this.pacman.score > this.getHighScore()) {
+            this.setHighScore(this.pacman.score)
+        }
     }
 
     gameLoop(timeStamp) {
