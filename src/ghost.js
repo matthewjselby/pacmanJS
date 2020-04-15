@@ -227,7 +227,9 @@ export default class Ghost {
         this.mode = "frightened"
         clearTimeout(this.frightenedTimer)
         this.frightenedTimer = setTimeout(() => {
-            if (this.mode == "frightened") this.mode == "normal"
+            if (this.mode == "frightened") {
+                this.mode = "normal"
+            }
             this.game.pacman.ghostMultiplier = 1
         }, 5 * 1000)
     }
