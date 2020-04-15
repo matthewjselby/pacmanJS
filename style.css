@@ -89,3 +89,65 @@
 .ghost {
     z-index: 2;
 }
+
+#start-screen {
+    position: absolute;
+    width: var(--width);
+    height: var(--height);
+    left: calc(50% - var(--width) / 2);
+    z-index: 3;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#start-screen>p {
+    color: white;
+    background-color: transparent;
+}
+
+#game-over {
+    position: absolute;
+    width: var(--width);
+    height: var(--height);
+    left: calc(50% - var(--width) / 2);
+    z-index: 3;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+#game-over>p {
+    color: white;
+    background-color: transparent;
+}
+
+#won-game {
+    position: absolute;
+    width: var(--width);
+    height: var(--height);
+    left: calc(50% - var(--width) / 2);
+    z-index: 3;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+#won-game>p {
+    color: white;
+    background-color: transparent;
+}

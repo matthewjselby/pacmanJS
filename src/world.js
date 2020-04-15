@@ -1,6 +1,6 @@
 export default class World {
 
-    constructor(canvas) {
+    constructor(game) {
         this.worldMap = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
@@ -34,22 +34,36 @@ export default class World {
             [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
         ]
-        this.canvas = canvas
+        this.numPellets = 300
+        this.canvas = document.getElementById('world')
         this.ctx = this.canvas.getContext('2d')
         this.ctx.canvas.width = 28 * 16
         this.ctx.canvas.height = 31 * 16
-        this.draw()
+        this.game = game
+        this.worldImage = new Image()
+        this.worldImage.src = './resources/world.png'
+        this.worldImage.onload = () => {
+            this.draw()
+        }
     }
 
     erasePellet(row, col) {
         this.ctx.clearRect(col * 16, row * 16, 16, 16)
+        if (this.worldMap[row][col] == 1) {
+            this.game.pacman.score += 10
+            this.numPellets -= 1
+        } else if (this.worldMap[row][col] == 3) {
+            this.game.pacman.score += 50
+            this.game.pacman.scareGhosts()
+            this.numPellets -= 1
+        }
+        this.worldMap[row][col] = 0
+        if (this.numPellets == 0) {
+            this.game.wonGame()
+        }
     }
 
     draw() {
-        var worldBitmap = new Image()
-        worldBitmap.onload = () => {
-            this.ctx.drawImage(worldBitmap, 0, 0)
-        }
-        worldBitmap.src = './resources/world.png'
+        this.ctx.drawImage(this.worldImage, 0, 0)
     }
 }

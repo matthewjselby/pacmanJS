@@ -2,41 +2,40 @@ import Ghost from "./ghost.js"
 
 export default class Inky extends Ghost {
 
-    constructor(canvas, world, pacman, blinky) {
-        super(canvas, world, pacman, "inky")
+    constructor(game) {
+        super(game, "inky")
         this.row = 29
         this.col = 23
-        this.blinky = blinky
     }
 
     getTargetBlock() {
         let targetBlock
         switch (this.mode) {
             case "normal":
-                switch(this.pacman.orientation) {
+                switch(this.game.pacman.orientation) {
                     case "right":
                         targetBlock = {
-                            row: this.pacman.row,
-                            col: this.pacman.col + 2
+                            row: this.game.pacman.row,
+                            col: this.game.pacman.col + 2
                         }
                     case "left":
                         targetBlock = {
-                            row: this.pacman.row,
-                            col: this.pacman.col - 2
+                            row: this.game.pacman.row,
+                            col: this.game.pacman.col - 2
                         }
                     case "up":
                         targetBlock = {
-                            row: this.pacman.row - 2,
-                            col: this.pacman.col - 2
+                            row: this.game.pacman.row - 2,
+                            col: this.game.pacman.col - 2
                         }
                     case "down":
                         targetBlock = {
-                            row: this.pacman.row + 2,
-                            col: this.pacman.col
+                            row: this.game.pacman.row + 2,
+                            col: this.game.pacman.col
                         }
                 }
-                targetBlock.row = targetBlock.row - (targetBlock.row - this.blinky.row)
-                targetBlock.col = targetBlock.col = (targetBlock.col - this.blinky.col)
+                targetBlock.row = targetBlock.row - (targetBlock.row - this.game.blinky.row)
+                targetBlock.col = targetBlock.col = (targetBlock.col - this.game.blinky.col)
                 return targetBlock
             case "scatter":
                 return { // If in scatter, Blinky moves to the upper right corner

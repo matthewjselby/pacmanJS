@@ -2,18 +2,17 @@ import { CreateImageLooper } from "../src/image-looper.js"
 
 export default class Ghost {
 
-    constructor(canvas, world, pacman, ghostName) {
+    constructor(game, ghostName) {
         // Constants
         this.targetMovementSpeed = 3.5 * 30 // Target movement speed in pixels per second (4 * 30 fps = 120 px/s)
         this.targetMovementAnimationSpeed = 4 // Animate movement 4x / second
         this.lastAnimationUpdate = 0
         // Set local vars from parameters
-        this.canvas = canvas
+        this.canvas = document.getElementById(ghostName)
         this.ctx = this.canvas.getContext('2d')
         this.ctx.canvas.width = 28 * 16
         this.ctx.canvas.height = 31 * 16
-        this.world = world
-        this.pacman = pacman
+        this.game = game
         // Current position/state info
         this.row = 1
         this.col = 1
@@ -27,7 +26,7 @@ export default class Ghost {
         // Load images for displaying Blinky
         this.images = this.preloadImages(ghostName)
         this.currentImage = this.images[this.mode].next(this.orientation)
-        this.pacman.ghosts.push(this)
+        this.game.pacman.ghosts.push(this)
     }
 
     preloadImages(ghostName) {
@@ -124,24 +123,24 @@ export default class Ghost {
         }
         let upCol = this.col
         let upRow = this.row - 1
-        if (this.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") {
+        if (this.game.world.worldMap[upRow][upCol] != 2 && this.orientation != "down") {
             if (!((this.col == 12 || this.col == 15) && (this.row == 11 || this.row == 23)) && !(this.row == 14 && (this.col == -1 || this.col == 28))) { // Special rule -- ghosts can't turn up at these locations
                 allowedMoves.push({ col: upCol, row: upRow, dir: "up" })
             }
         }
         let downCol = this.col
         let downRow = this.row + 1
-        if (this.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") {
+        if (this.game.world.worldMap[downRow][downCol] != 2 && this.orientation != "up") {
             if (!(this.row == 14 && (this.col == -1 || this.col == 28))) {
                 allowedMoves.push({ col: downCol, row: downRow, dir: "down" })
             }
         }
         let leftCol = this.col - 1
         let leftRow = this.row
-        if (this.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({ col: leftCol, row: leftRow, dir: "left" })
+        if (this.game.world.worldMap[leftRow][leftCol] != 2 && this.orientation != "right") allowedMoves.push({ col: leftCol, row: leftRow, dir: "left" })
         let rightCol = this.col + 1
         let rightRow = this.row
-        if (this.world.worldMap[rightRow][rightCol] != 2 && this.orientation != "left") allowedMoves.push({ col: rightCol, row: rightRow, dir: "right" })
+        if (this.game.world.worldMap[rightRow][rightCol] != 2 && this.orientation != "left") allowedMoves.push({ col: rightCol, row: rightRow, dir: "right" })
         return allowedMoves
     }
 
@@ -152,13 +151,13 @@ export default class Ghost {
     canMoveToNextSquareInDirection(direction) {
         switch (direction) {
             case "right":
-                return this.world.worldMap[this.row][this.col + 1] != 2
+                return this.game.world.worldMap[this.row][this.col + 1] != 2
             case "left":
-                return this.world.worldMap[this.row][this.col - 1] != 2
+                return this.game.world.worldMap[this.row][this.col - 1] != 2
             case "down":
-                return this.world.worldMap[this.row + 1][this.col] != 2
+                return this.game.world.worldMap[this.row + 1][this.col] != 2
             case "up":
-                return this.world.worldMap[this.row - 1][this.col] != 2
+                return this.game.world.worldMap[this.row - 1][this.col] != 2
         }
     }
 
@@ -207,15 +206,15 @@ export default class Ghost {
         let rightBound = (this.col * 16) + this.offsetX + 32
         let upperBound = (this.row * 16) + this.offsetY
         let lowerBound = (this.row * 16) + this.offsetY + 32
-        let pacmanLeftBound = (this.pacman.col * 16) + this.pacman.offsetX
-        let pacmanRightBound = (this.pacman.col * 16) + this.pacman.offsetX + 32
-        let pacmanUpperBound = (this.pacman.row * 16) + this.pacman.offsetY
-        let pacmanLowerBound = (this.pacman.row * 16) + this.pacman.offsetY + 32
-        if (this.col == this.pacman.col) {
+        let pacmanLeftBound = (this.game.pacman.col * 16) + this.game.pacman.offsetX
+        let pacmanRightBound = (this.game.pacman.col * 16) + this.game.pacman.offsetX + 32
+        let pacmanUpperBound = (this.game.pacman.row * 16) + this.game.pacman.offsetY
+        let pacmanLowerBound = (this.game.pacman.row * 16) + this.game.pacman.offsetY + 32
+        if (this.col == this.game.pacman.col) {
             if ((pacmanUpperBound < lowerBound && pacmanUpperBound > upperBound) || (pacmanLowerBound > upperBound && pacmanLowerBound < lowerBound)) {
                 return true
             }
-        } else if (this.row == this.pacman.row) {
+        } else if (this.row == this.game.pacman.row) {
             if ((pacmanLeftBound < rightBound && pacmanLeftBound > leftBound) || (pacmanRightBound > leftBound && pacmanRightBound < rightBound)) {
                 return true
             }
@@ -229,7 +228,7 @@ export default class Ghost {
         clearTimeout(this.frightenedTimer)
         this.frightenedTimer = setTimeout(() => {
             if (this.mode == "frightened") this.mode == "normal"
-            this.pacman.ghostMultiplier = 1
+            this.game.pacman.ghostMultiplier = 1
         }, 5 * 1000)
     }
 
@@ -281,11 +280,11 @@ export default class Ghost {
             if (this.checkForCollisionWithPacman()) {
                 if (this.mode == "frightened") {
                     this.mode = "dead"
-                    this.currentImage = this.images["score"][this.pacman.ghostMultiplier - 1]
-                    this.pacman.ateGhost()
+                    this.currentImage = this.images["score"][this.game.pacman.ghostMultiplier - 1]
+                    this.game.pacman.ateGhost()
                     this.deadFrames = 2
                 } else if (this.mode == "normal" || this.mode == "scatter") {
-                    this.pacman.isDead = true
+                    this.game.pacman.isDead = true
                     this.mode = "scatter"
                 }
             }

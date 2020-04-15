@@ -2,8 +2,8 @@ import Ghost from "./ghost.js"
 
 export default class Pinky extends Ghost {
 
-    constructor(canvas, world, pacman) {
-        super(canvas, world, pacman, "pinky")
+    constructor(game) {
+        super(game, "pinky")
         this.row = 1
         this.col = 1
     }
@@ -11,26 +11,26 @@ export default class Pinky extends Ghost {
     getTargetBlock() {
         switch (this.mode) {
             case "normal":
-                switch(this.pacman.orientation) {
+                switch(this.game.pacman.orientation) {
                     case "right":
                         return {
-                            row: this.pacman.row,
-                            col: this.pacman.col + 4
+                            row: this.game.pacman.row,
+                            col: this.game.pacman.col + 4
                         }
                     case "left":
                         return {
-                            row: this.pacman.row,
-                            col: this.pacman.col - 4
+                            row: this.game.pacman.row,
+                            col: this.game.pacman.col - 4
                         }
                     case "up":
                         return {
-                            row: this.pacman.row - 4,
-                            col: this.pacman.col - 4
+                            row: this.game.pacman.row - 4,
+                            col: this.game.pacman.col - 4
                         }
                     case "down":
                         return {
-                            row: this.pacman.row + 4,
-                            col: this.pacman.col
+                            row: this.game.pacman.row + 4,
+                            col: this.game.pacman.col
                         }
                 }
             case "scatter":
